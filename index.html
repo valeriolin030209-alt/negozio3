@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Casa Market - Catalogo clienti</title>
+  <meta name="description" content="Catalogo digitale clienti per negozio di casalinghi, prodotti ordinabili per categoria, nome e prezzo.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body data-page="public">
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <header class="topbar">
+    <button id="openCategories" class="category-toggle" type="button" aria-label="Apri categorie" aria-expanded="false">&#9776;</button>
+    <div class="brand-block">
+      <div class="logo-mark">CM</div>
+      <div>
+        <h1 id="shopName">Casa Market</h1>
+        <p id="shopSubtitle">Catalogo digitale del negozio</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div id="topMessage" class="top-message hidden" aria-live="polite"></div>
+      <button id="openOrders" class="cart-button" type="button" aria-label="Apri carrello e ordini">
+        <span class="cart-icon" aria-hidden="true">&#128722;</span>
+        <span>I miei ordini</span>
+        <span id="cartBadge" class="badge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="categoryBackdrop" class="category-backdrop hidden"></div>
+
+  <main class="layout">
+    <aside class="category-panel" aria-label="Categorie prodotti">
+      <div class="category-panel-header">
+        <div class="panel-title">Categorie</div>
+        <button id="closeCategories" class="icon-button category-close" type="button" aria-label="Chiudi categorie">x</button>
+      </div>
+      <nav id="categoryList" class="category-list"></nav>
+    </aside>
+
+    <section class="catalog-panel">
+      <div id="catalogNotice" class="catalog-notice hidden"></div>
+      <div class="catalog-heading">
+        <div>
+          <p class="eyebrow">Catalogo clienti</p>
+          <h2 id="activeCategoryTitle">Tutti i prodotti</h2>
+        </div>
+        <div class="catalog-tools">
+          <label>
+            Cerca prodotto
+            <input id="searchInput" type="search" placeholder="Cerca prodotto..." autocomplete="off">
+          </label>
+          <label>
+            Ordina prodotti
+            <select id="productSort">
+              <option value="category">Per categoria</option>
+              <option value="name">Per nome A-Z</option>
+              <option value="price-asc">Prezzo crescente</option>
+              <option value="price-desc">Prezzo decrescente</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div id="productGrid" class="product-grid"></div>
+      <div id="emptyCatalog" class="empty-state hidden">
+        <h3>Nessun prodotto trovato</h3>
+        <p>Prova un'altra categoria oppure torna piu tardi.</p>
+      </div>
+    </section>
+  </main>
+
+  <aside id="ordersDrawer" class="drawer" aria-label="Carrello e ordini" aria-hidden="true">
+    <div class="drawer-header">
+      <div>
+        <p class="eyebrow">Cliente</p>
+        <h2>Carrello e ordini</h2>
+      </div>
+      <button id="closeOrders" class="icon-button" type="button" aria-label="Chiudi">x</button>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Prodotti selezionati</h3>
+      <div id="cartItems" class="stack"></div>
+      <div class="cart-total">
+        <span>Totale indicativo</span>
+        <strong id="cartTotal">0,00 EUR</strong>
+      </div>
+      <form id="checkoutForm" class="checkout-form">
+        <p id="minOrderNotice" class="form-hint">Ordine minimo del negozio.</p>
+        <label>
+          Nome e cognome cliente
+          <input id="customerName" type="text" placeholder="Es. Mario Rossi" autocomplete="name" required>
+        </label>
+        <label>
+          Numero di telefono
+          <input id="customerContact" type="tel" inputmode="tel" placeholder="Es. 333 1234567" autocomplete="tel" required>
+        </label>
+        <label>
+          Tipo di consegna / indirizzo
+          <select id="customerAddressType" required>
+            <option value="">Seleziona destinazione</option>
+            <option value="Casa / ufficio">Casa / ufficio</option>
+            <option value="Mercato martedi">Mercato martedi</option>
+            <option value="Mercato mercoledi">Mercato mercoledi</option>
+            <option value="Mercato giovedi">Mercato giovedi</option>
+          </select>
+        </label>
+        <label id="customerAddressWrap" class="hidden">
+          Indirizzo casa / ufficio
+          <input id="customerAddress" type="text" placeholder="Via, numero civico, citta" autocomplete="street-address">
+        </label>
+        <label>
+          Metodo di pagamento
+          <select id="customerPayment" required>
+            <option value="">Seleziona metodo</option>
+            <option value="Contanti alla consegna">Contanti alla consegna</option>
+            <option value="Carta alla consegna">Carta alla consegna</option>
+            <option value="Altro / da concordare">Altro / da concordare</option>
+          </select>
+        </label>
+        <label>
+          Note ordine
+          <textarea id="customerNote" rows="3" placeholder="Opzionale: colore, misura, consegna..."></textarea>
+        </label>
+        <button id="submitOrderButton" class="primary-button" type="submit">Invia ordine</button>
+      </form>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Ordini inviati da questo dispositivo</h3>
+      <div id="myOrders" class="stack"></div>
+    </div>
+  </aside>
+  <div id="drawerBackdrop" class="backdrop hidden"></div>
+
+  <section id="productDetailModal" class="modal-shell hidden" aria-label="Dettaglio prodotto" aria-hidden="true">
+    <div class="modal-card product-detail-card">
+      <button id="closeProductDetail" class="icon-button modal-close" type="button" aria-label="Chiudi">x</button>
+      <div id="productDetailBody"></div>
+    </div>
+  </section>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

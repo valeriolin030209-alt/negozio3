@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Casa Market - Area admin</title>
+  <meta name="description" content="Pagina amministratore per gestire categorie, prodotti, ordini e QR code del catalogo Casa Market.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body data-page="admin">
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <header class="topbar admin-topbar">
+    <button id="openCategories" class="category-toggle" type="button" aria-label="Apri categorie" aria-expanded="false">&#9776;</button>
+    <div class="brand-block">
+      <div class="logo-mark">CM</div>
+      <div>
+        <h1 id="shopName">Casa Market</h1>
+        <p id="shopSubtitle">Catalogo digitale del negozio</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div id="topMessage" class="top-message hidden" aria-live="polite"></div>
+      <button id="adminShortcut" class="ghost-button" type="button">Accedi area admin</button>
+      <button id="openOrders" class="cart-button" type="button" aria-label="Apri carrello e ordini">
+        <span class="cart-icon" aria-hidden="true">&#128722;</span>
+        <span>Anteprima ordini cliente</span>
+        <span id="cartBadge" class="badge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="categoryBackdrop" class="category-backdrop hidden"></div>
+
+  <main class="layout">
+    <aside class="category-panel" aria-label="Categorie prodotti">
+      <div class="category-panel-header">
+        <div class="panel-title">Categorie</div>
+        <button id="closeCategories" class="icon-button category-close" type="button" aria-label="Chiudi categorie">x</button>
+      </div>
+      <nav id="categoryList" class="category-list"></nav>
+    </aside>
+
+    <section class="catalog-panel">
+      <div class="admin-preview-note">
+        <strong>Pagina admin:</strong> questa pagina mostra anche l'anteprima del catalogo clienti. Per modificare categorie, prodotti e ordini entra nell'area admin.
+      </div>
+      <div id="catalogNotice" class="catalog-notice hidden"></div>
+      <div class="catalog-heading">
+        <div>
+          <p class="eyebrow">Anteprima catalogo</p>
+          <h2 id="activeCategoryTitle">Tutti i prodotti</h2>
+        </div>
+        <div class="catalog-tools">
+          <label>
+            Cerca prodotto
+            <input id="searchInput" type="search" placeholder="Cerca prodotto..." autocomplete="off">
+          </label>
+          <label>
+            Ordina prodotti
+            <select id="productSort">
+              <option value="category">Per categoria</option>
+              <option value="name">Per nome A-Z</option>
+              <option value="price-asc">Prezzo crescente</option>
+              <option value="price-desc">Prezzo decrescente</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div id="productGrid" class="product-grid"></div>
+      <div id="emptyCatalog" class="empty-state hidden">
+        <h3>Nessun prodotto trovato</h3>
+        <p>Prova un'altra categoria oppure aggiungi prodotti dall'area admin.</p>
+      </div>
+    </section>
+  </main>
+
+  <aside id="ordersDrawer" class="drawer" aria-label="Carrello e ordini" aria-hidden="true">
+    <div class="drawer-header">
+      <div>
+        <p class="eyebrow">Anteprima cliente</p>
+        <h2>Carrello e ordini</h2>
+      </div>
+      <button id="closeOrders" class="icon-button" type="button" aria-label="Chiudi">x</button>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Prodotti selezionati</h3>
+      <div id="cartItems" class="stack"></div>
+      <div class="cart-total">
+        <span>Totale indicativo</span>
+        <strong id="cartTotal">0,00 EUR</strong>
+      </div>
+      <form id="checkoutForm" class="checkout-form">
+        <p id="minOrderNotice" class="form-hint">Ordine minimo del negozio.</p>
+        <label>
+          Nome e cognome cliente
+          <input id="customerName" type="text" placeholder="Es. Mario Rossi" autocomplete="name" required>
+        </label>
+        <label>
+          Numero di telefono
+          <input id="customerContact" type="tel" inputmode="tel" placeholder="Es. 333 1234567" autocomplete="tel" required>
+        </label>
+        <label>
+          Tipo di consegna / indirizzo
+          <select id="customerAddressType" required>
+            <option value="">Seleziona destinazione</option>
+            <option value="Casa / ufficio">Casa / ufficio</option>
+            <option value="Mercato martedi">Mercato martedi</option>
+            <option value="Mercato mercoledi">Mercato mercoledi</option>
+            <option value="Mercato giovedi">Mercato giovedi</option>
+          </select>
+        </label>
+        <label id="customerAddressWrap" class="hidden">
+          Indirizzo casa / ufficio
+          <input id="customerAddress" type="text" placeholder="Via, numero civico, citta" autocomplete="street-address">
+        </label>
+        <label>
+          Metodo di pagamento
+          <select id="customerPayment" required>
+            <option value="">Seleziona metodo</option>
+            <option value="Contanti alla consegna">Contanti alla consegna</option>
+            <option value="Carta alla consegna">Carta alla consegna</option>
+            <option value="Altro / da concordare">Altro / da concordare</option>
+          </select>
+        </label>
+        <label>
+          Note ordine
+          <textarea id="customerNote" rows="3" placeholder="Opzionale: colore, misura, consegna..."></textarea>
+        </label>
+        <button id="submitOrderButton" class="primary-button" type="submit">Invia ordine</button>
+      </form>
+    </div>
+
+    <div class="drawer-section">
+      <h3>Ordini inviati da questo dispositivo</h3>
+      <div id="myOrders" class="stack"></div>
+    </div>
+  </aside>
+  <div id="drawerBackdrop" class="backdrop hidden"></div>
+
+  <section id="productDetailModal" class="modal-shell hidden" aria-label="Dettaglio prodotto" aria-hidden="true">
+    <div class="modal-card product-detail-card">
+      <button id="closeProductDetail" class="icon-button modal-close" type="button" aria-label="Chiudi">x</button>
+      <div id="productDetailBody"></div>
+    </div>
+  </section>
+
+  <section id="adminModal" class="modal-shell hidden" aria-label="Area amministratore" aria-hidden="true">
+    <div class="modal-card admin-card">
+      <button id="closeAdmin" class="icon-button modal-close" type="button" aria-label="Chiudi">x</button>
+
+      <div id="adminLogin" class="admin-login">
+        <p class="eyebrow">Area riservata</p>
+        <h2>Accesso admin</h2>
+        <p class="muted">Inserisci il codice admin del negozio.</p>
+        <form id="adminLoginForm" class="grid-form admin-login-form">
+          <label class="full-span">
+            Codice admin
+            <input id="adminPinInput" type="password" placeholder="Codice admin" autocomplete="current-password" required>
+          </label>
+          <div id="firebaseLoginFields" class="firebase-login-fields full-span">
+            <label>
+              Email admin Firebase
+              <input id="adminEmailInput" type="email" placeholder="email amministratore">
+            </label>
+            <label>
+              Password Firebase
+              <input id="adminPasswordInput" type="password" placeholder="password amministratore" autocomplete="current-password">
+            </label>
+            <p id="firebaseLoginHint" class="form-hint full-span">Con Firebase attivo, il codice apre il pannello e l'email/password protegge davvero le modifiche online.</p>
+          </div>
+          <button class="primary-button full-span" type="submit">Entra</button>
+          <p id="firebaseStatus" class="form-hint full-span">Controllo collegamento Firebase...</p>
+        </form>
+      </div>
+
+      <div id="adminPanel" class="admin-panel hidden">
+        <div class="admin-header">
+          <div>
+            <p class="eyebrow">Gestione negozio</p>
+            <h2>Pannello admin</h2>
+            <p class="muted small">Da qui puoi aggiungere categorie, caricare prodotti con foto, descrizione e prezzo, e sistemare la disposizione del catalogo.</p>
+          </div>
+          <button id="adminLogout" class="ghost-button" type="button">Esci</button>
+        </div>
+
+        <div class="admin-tabs" role="tablist" aria-label="Sezioni admin">
+          <button class="tab-button active" data-tab="settings" type="button">Negozio</button>
+          <button class="tab-button" data-tab="categories" type="button">Categorie</button>
+          <button class="tab-button" data-tab="products" type="button">Prodotti</button>
+          <button class="tab-button" data-tab="orders" type="button">Ordini</button>
+          <button class="tab-button" data-tab="qr" type="button">QR code</button>
+        </div>
+
+        <div class="admin-content">
+          <section class="tab-page active" data-page="settings">
+            <h3>Impostazioni negozio</h3>
+            <form id="settingsForm" class="grid-form">
+              <label>
+                Nome negozio
+                <input id="settingShopName" type="text" required>
+              </label>
+              <label>
+                Sottotitolo
+                <input id="settingSubtitle" type="text" required>
+              </label>
+              <label>
+                Spesa minima generale/predefinita
+                <input id="settingMinOrderTotal" type="number" step="0.01" min="0" placeholder="Es. 15.00" required>
+              </label>
+              <div class="destination-minimums full-span">
+                <div>
+                  <strong>Spesa minima per destinazione</strong>
+                  <p class="muted small">Imposta il minimo d'ordine richiesto per ogni tipo di consegna. Il cliente potra inviare l'ordine solo se raggiunge il minimo della destinazione scelta.</p>
+                </div>
+                <div class="destination-min-grid">
+                  <label>
+                    Casa / ufficio
+                    <input type="number" step="0.01" min="0" data-min-destination="Casa / ufficio" placeholder="Es. 15.00" required>
+                  </label>
+                  <label>
+                    Mercato martedi
+                    <input type="number" step="0.01" min="0" data-min-destination="Mercato martedi" placeholder="Es. 15.00" required>
+                  </label>
+                  <label>
+                    Mercato mercoledi
+                    <input type="number" step="0.01" min="0" data-min-destination="Mercato mercoledi" placeholder="Es. 15.00" required>
+                  </label>
+                  <label>
+                    Mercato giovedi
+                    <input type="number" step="0.01" min="0" data-min-destination="Mercato giovedi" placeholder="Es. 15.00" required>
+                  </label>
+                </div>
+              </div>
+              <div class="firebase-admin-card full-span">
+                <div>
+                  <strong>Sincronizzazione online Firebase</strong>
+                  <p id="firebaseStatusText" class="muted small">Quando Firebase e configurato, prodotti, categorie, impostazioni e ordini sono condivisi tra admin e clienti.</p>
+                </div>
+                <div class="form-actions">
+                  <button id="seedFirebaseButton" class="ghost-button" type="button">Carica dati attuali su Firebase</button>
+                </div>
+              </div>
+              <label class="full-span">
+                Casella informativa sopra il catalogo clienti
+                <textarea id="settingCatalogNotice" rows="3" placeholder="Es. Ordine minimo 15 EUR. Consegna disponibile in giornata..."></textarea>
+              </label>
+              <label class="full-span">
+                Messaggio in primo piano in alto
+                <input id="settingTopMessage" type="text" placeholder="Es. Nuovi arrivi, promozioni, comunicazioni importanti...">
+              </label>
+              <button class="primary-button full-span" type="submit">Salva impostazioni</button>
+            </form>
+          </section>
+
+          <section class="tab-page" data-page="categories">
+            <div class="admin-section-heading">
+              <div>
+                <h3>Categorie verticali</h3>
+                <p class="muted">L'admin puo aggiungere, rinominare, eliminare e riordinare le categorie visibili agli utenti.</p>
+              </div>
+            </div>
+            <form id="categoryForm" class="inline-form">
+              <input id="categoryNameInput" type="text" placeholder="Nome categoria, es. Elettronica" required>
+              <button class="primary-button" type="submit">Aggiungi categoria</button>
+            </form>
+            <div id="adminCategoryList" class="admin-list"></div>
+          </section>
+
+          <section class="tab-page" data-page="products">
+            <div class="split-grid">
+              <div>
+                <h3>Aggiungi o modifica prodotto</h3>
+                <p class="muted small">Scegli la categoria, carica la foto, scrivi descrizione, prezzo, varianti ed eventuale offerta, poi salva il prodotto.</p>
+                <form id="productForm" class="grid-form">
+                  <input id="editingProductId" type="hidden">
+                  <label>
+                    Categoria
+                    <select id="productCategorySelect" required></select>
+                  </label>
+                  <label>
+                    Nome prodotto
+                    <input id="productNameInput" type="text" placeholder="Es. Set contenitori" required>
+                  </label>
+                  <label>
+                    Prezzo indicativo
+                    <input id="productPriceInput" type="number" step="0.01" min="0" placeholder="Es. 4.90">
+                  </label>
+                  <label class="checkbox-row sale-checkbox-row">
+                    <input id="productSaleEnabledInput" type="checkbox">
+                    <span>Prodotto in offerta</span>
+                  </label>
+                  <label>
+                    Prezzo offerta indicativo
+                    <input id="productSalePriceInput" type="number" step="0.01" min="0" placeholder="Solo se non ci sono varianti">
+                  </label>
+                  <p class="form-hint full-span sale-form-hint">Se il prodotto ha misure, colori o grandezze diverse, inserisci il prezzo offerta dentro ogni variante. Il prezzo offerta deve essere piu basso del prezzo normale.</p>
+                  <div class="variant-editor full-span">
+                    <div class="variant-editor-head">
+                      <div>
+                        <strong>Varianti prodotto</strong>
+                        <p class="muted small">Opzionale: aggiungi misure, grandezze, colori o versioni diverse con prezzo specifico.</p>
+                      </div>
+                      <button id="addVariantRow" class="mini-button" type="button">Aggiungi variante</button>
+                    </div>
+                    <div id="productVariantsList" class="variant-list"></div>
+                  </div>
+                  <label>
+                    Foto prodotto
+                    <input id="productImageInput" type="file" accept="image/*">
+                  </label>
+                  <label class="checkbox-row">
+                    <input id="productEnabledInput" type="checkbox" checked>
+                    <span>Prodotto visibile agli utenti</span>
+                  </label>
+                  <label class="full-span">
+                    Descrizione
+                    <textarea id="productDescInput" rows="5" placeholder="Materiale, dimensioni, colore, disponibilita..."></textarea>
+                  </label>
+                  <div class="form-actions full-span">
+                    <button class="primary-button" type="submit">Salva prodotto</button>
+                    <button id="resetProductForm" class="ghost-button" type="button">Pulisci</button>
+                  </div>
+                </form>
+              </div>
+              <div>
+                <div class="admin-section-heading compact">
+                  <h3>Prodotti caricati</h3>
+                  <select id="adminProductFilter"></select>
+                </div>
+                <div id="adminProductList" class="admin-list product-admin-list"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tab-page" data-page="orders">
+            <div class="admin-section-heading">
+              <div>
+                <h3>Ordini ricevuti</h3>
+                <p class="muted">Con Firebase configurato, gli ordini sono salvati online e visibili da tutti i dispositivi admin.</p>
+              </div>
+              <button id="clearCompletedOrders" class="danger-button" type="button">Cancella ordini chiusi</button>
+            </div>
+            <div id="adminOrdersList" class="admin-list"></div>
+          </section>
+
+          <section class="tab-page" data-page="qr">
+            <h3>QR code per clienti</h3>
+            <p class="muted">Dopo aver pubblicato il sito online, incolla qui il link pubblico della pagina clienti, cioe index.html, e genera il QR da stampare.</p>
+            <div class="qr-grid">
+              <form id="qrForm" class="grid-form">
+                <label class="full-span">
+                  Link pubblico della pagina clienti
+                  <input id="qrUrlInput" type="url" placeholder="https://nome-negozio.netlify.app/index.html" required>
+                </label>
+                <button class="primary-button" type="submit">Genera QR</button>
+              </form>
+              <div class="qr-preview-card">
+                <div id="qrPlaceholder" class="qr-placeholder">QR</div>
+                <img id="qrImage" class="qr-image hidden" alt="QR code del catalogo clienti">
+                <a id="downloadQr" class="ghost-button hidden" href="#" download="qr-catalogo-clienti.png">Scarica QR</a>
+                <p class="muted small">Il QR deve portare alla pagina clienti, non alla pagina admin.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
