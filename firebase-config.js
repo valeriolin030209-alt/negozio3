@@ -5,14 +5,24 @@
 // 4) Inserisci in adminEmails l'email dell'account admin creato in Firebase Authentication.
 
 export const firebaseConfig = {
-  apiKey: "INSERISCI_API_KEY",
-  authDomain: "INSERISCI_PROJECT_ID.firebaseapp.com",
-  projectId: "INSERISCI_PROJECT_ID",
-  storageBucket: "INSERISCI_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "INSERISCI_MESSAGING_SENDER_ID",
-  appId: "INSERISCI_APP_ID"
+
+  apiKey: "AIzaSyD6S3V3y5Tt-zXX8FKASmffLnctqXp2vSE",
+
+  authDomain: "negozio-d5c75.firebaseapp.com",
+
+  projectId: "negozio-d5c75",
+
+  storageBucket: "negozio-d5c75.firebasestorage.app",
+
+  messagingSenderId: "972727940645",
+
+  appId: "1:972727940645:web:19d17f6334a9949ccbf1cc",
+
+  measurementId: "G-Z7L2NQX445"
+
 };
 
 export const firebaseOptions = {
-  adminEmails: ["email-admin@example.com"]
+  adminEmails: ["valeriolin030209@gmail.com
+                "]
 };
