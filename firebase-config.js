@@ -23,6 +23,5 @@ export const firebaseConfig = {
 };
 
 export const firebaseOptions = {
-  adminEmails: ["valeriolin030209@gmail.com
-                "]
+  adminEmails: ["valeriolin030209@gmail.com"]
 };
